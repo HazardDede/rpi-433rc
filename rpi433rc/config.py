@@ -1,0 +1,3 @@
+GPIO_OUT = 17
+
+VERSION = '1.0.0'

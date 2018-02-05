@@ -1,0 +1,4 @@
+pip-compile
+pytest
+pytest-cov
+flake8

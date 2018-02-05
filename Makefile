@@ -1,23 +1,35 @@
-.PHONY: clean build
+.PHONY: clean-pyc clean-build
 
-RELEASE_IMAGE_NAME = rpi-433rc
-CURRENT_TAG = latest
+SOURCE_PATH=./rpi433rc
+TEST_PATH=./tests
 
-CONTAINER_NAME = rpi-433rc
+help:
+		@echo "    clean-pyc"
+		@echo "        Remove python artifacts."
+		@echo "    clean-build"
+		@echo "        Remove build artifacts."
+		@echo "    lint"
+		@echo "        Check style with flake8."
+		@echo "    test"
+		@echo "        Run py.test"
 
-build:
-	docker build -t $(RELEASE_IMAGE_NAME):$(CURRENT_TAG) .
+clean-pyc:
+		find . -name '*.pyc' -delete
+		find . -name '*.pyo' -delete
+		# find . -name '*~' -exec rm --force  {} +
 
-shell: build
-	docker run -it --rm --name $(CONTAINER_NAME) --privileged --cap-add SYS_RAWIO --device=/dev/mem $(RELEASE_IMAGE_NAME):$(CURRENT_TAG) bash
+clean-build:
+		rm --force --recursive build/
+		rm --force --recursive dist/
+		rm --force --recursive *.egg-info
 
-run: build
-	docker run --rm --name $(CONTAINER_NAME) --privileged --cap-add SYS_RAWIO --device=/dev/mem $(RELEASE_IMAGE_NAME):$(CURRENT_TAG)
+clean: clean-pyc clean-build
 
-sniff: build
-	docker run --rm -it --name $(CONTAINER_NAME) --privileged --cap-add SYS_RAWIO --device=/dev/mem $(RELEASE_IMAGE_NAME):$(CURRENT_TAG) sniff
+lint:
+		flake8 --exclude=.tox --max-line-length 120 $(SOURCE_PATH)
 
-clean:
-	docker ps -a | grep '$(CONTAINER_NAME)' | awk '{print $$1}' | xargs docker rm
-	if [ $(shell docker image inspect $(RELEASE_IMAGE_NAME):$(CURRENT_TAG) > /dev/null 2>/dev/null ; echo $$?) -eq 0 ] ; then docker rmi $(RELEASE_IMAGE_NAME):$(CURRENT_TAG) ; fi
+test:
+		pytest --verbose --color=yes --doctest-modules -s --cov=$(SOURCE_PATH) --cov-report html --cov-report term $(TEST_PATH) $(SOURCE_PATH)
 
+doctest:
+		pytest --verbose --color=yes --doctest-modules $(SOURCE_PATH)
