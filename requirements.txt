@@ -4,13 +4,20 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
+--extra-index-url https://www.piwheels.hostedpi.com/simple
+
+aniso8601==2.0.0          # via flask-restplus
 attrs==17.4.0
 click==6.7                # via flask
+flask-restplus==0.10.1
 flask==0.12.2
 itsdangerous==0.24        # via flask
 jinja2==2.10              # via flask
+jsonschema==2.6.0         # via flask-restplus
 markupsafe==1.0           # via jinja2
+pytz==2017.3              # via flask-restplus
 rpi-rf==0.9.6
 rpi.gpio==0.6.3           # via rpi-rf
 schema==0.6.7
+six==1.11.0               # via flask-restplus
 werkzeug==0.14.1          # via flask

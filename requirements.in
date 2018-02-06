@@ -1,4 +1,5 @@
 attrs
 flask
+flask-restplus
 schema
 rpi-rf

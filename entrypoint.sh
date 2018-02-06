@@ -6,8 +6,7 @@ case ${1} in
       exec rpi-rf_receive "$@"
       ;;
     serve)
-      echo "Serving via rest-api is not implemented"
-      exec ${WORKDIR}/run.sh
+      exec flask run --host=0.0.0.0
       ;;
     *)
       exec "$@"

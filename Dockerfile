@@ -11,6 +11,8 @@ RUN mkdir -p ${WORKDIR} && \
 # Install rest-api wrapper for rpi-rf
 COPY . ${WORKDIR}
 RUN pip3 install -r ${WORKDIR}/requirements.txt
+# Setting correct entrypoint
+ENV FLASK_APP ${WORKDIR}/rpi433rc/app.py
 
 # Re-copy the entrypoint.sh to the root
 COPY ./entrypoint.sh /entrypoint.sh

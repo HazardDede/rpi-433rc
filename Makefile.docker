@@ -17,8 +17,9 @@ shell: build
 run: build
 	docker run --rm \
 	    --name $(CONTAINER_NAME) \
+	    -p "5555:5000" \
 	    --privileged --cap-add SYS_RAWIO --device=/dev/mem \
-	    $(RELEASE_IMAGE_NAME):$(CURRENT_TAG)
+	    $(RELEASE_IMAGE_NAME):$(CURRENT_TAG) serve
 
 sniff: build
 	docker run --rm -it \
