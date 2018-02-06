@@ -29,7 +29,10 @@ lint:
 		flake8 --exclude=.tox --max-line-length 120 $(SOURCE_PATH)
 
 test:
-		pytest --verbose --color=yes --doctest-modules -s --cov=$(SOURCE_PATH) --cov-report html --cov-report term $(TEST_PATH) $(SOURCE_PATH)
+		pytest --verbose --color=yes -s \
+		    --doctest-modules \
+		    --cov=$(SOURCE_PATH) --cov-report html --cov-report term \
+		    $(TEST_PATH) $(SOURCE_PATH)
 
 doctest:
 		pytest --verbose --color=yes --doctest-modules $(SOURCE_PATH)

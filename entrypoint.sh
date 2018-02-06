@@ -7,10 +7,9 @@ case ${1} in
       ;;
     serve)
       echo "Serving via rest-api is not implemented"
-      break
+      exec ${WORKDIR}/run.sh
       ;;
     *)
       exec "$@"
       ;;
 esac
-

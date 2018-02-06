@@ -1,4 +1,5 @@
-pip-compile
+pip-tools
 pytest
 pytest-cov
+pytest-mock
 flake8

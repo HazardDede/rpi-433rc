@@ -1,4 +1,11 @@
+import logging
+
 from flask import Flask
+
+from .config import DEBUG
+
+level = logging.DEBUG if DEBUG else logging.INFO
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=level)
 
 app = Flask(__name__)
 

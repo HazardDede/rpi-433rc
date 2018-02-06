@@ -1,0 +1,16 @@
+.git
+.idea
+.pytest_cache
+htmlcov
+.coverage
+
+
+Dockerfile
+.DS_Store
+.gitignore
+.dockerignore
+README.md
+
+
+Makefile
+Makefile.docker

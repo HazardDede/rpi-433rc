@@ -21,7 +21,7 @@ state = api.model('State', {
 
 device = api.model('Device', {
     'device_name': fields.String(attribute="device.device_name"),
-    'type': fields.String(attribute=lambda o: str(o.device.__class__.__name__) if hasattr(o,'device') else None),
+    'type': fields.String(attribute=lambda o: str(o.device.__class__.__name__) if hasattr(o, 'device') else None),
     'configuration': _fields.Dict(attribute="device.configuration"),
     'state': _fields.OnOff
 })
@@ -52,7 +52,8 @@ class DeviceSwitch(Resource):
         from . import device_db
         from . import rc433
         device = device_db.lookup(device_name)
-        if rc433.switch_device(device):
+        res = rc433.switch_device(device, on_off)
+        if res:
             # Mark the device as on resp. off
             device_db.switch(device_name, on_off)
-        return {'state': on_off}
+        return {'state': on_off, 'result': res}

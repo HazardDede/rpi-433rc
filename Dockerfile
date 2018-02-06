@@ -7,14 +7,14 @@ ENV WORKDIR /rpi-433rc
 RUN mkdir -p ${WORKDIR} && \
     cd ${WORKDIR}
 
-COPY ./entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-# Install necessary dependencies
-RUN pip3 install rpi-rf==${RPIRF_VERSION}
 
 # Install rest-api wrapper for rpi-rf
-# Not yet implemented
+COPY . ${WORKDIR}
+RUN pip3 install -r ${WORKDIR}/requirements.txt
+
+# Re-copy the entrypoint.sh to the root
+COPY ./entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 # Entrypoint defaults to bash
 ENTRYPOINT ["/entrypoint.sh"]

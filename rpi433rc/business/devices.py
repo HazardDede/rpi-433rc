@@ -6,6 +6,8 @@ import attr
 
 from schema import Schema, Or, Use
 
+from .util import LogMixin
+
 
 class UnknownDeviceError(Exception):
     pass
@@ -95,7 +97,7 @@ __ALL_DEVICES__ = [CodeDevice, SystemDevice]
 
 
 @attr.s
-class DeviceStore(object):
+class DeviceStore(LogMixin):
     """
     Abstract base classes for storing / fetching configured devices.
     """

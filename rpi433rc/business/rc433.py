@@ -1,6 +1,7 @@
 import attr
 
-from .devices import CodeDevice
+from .devices import CodeDevice, StatefulDevice
+from .util import LogMixin
 
 try:
     from rpi_rf import RFDevice
@@ -26,7 +27,7 @@ class UnsupportedDeviceError(Exception):
 
 
 @attr.s
-class RC433(object):
+class RC433(LogMixin):
     """
     Remote control 433mhz devices.
     """
@@ -59,6 +60,7 @@ class RC433(object):
             raise TypeError("Argument code is expected to be an int, but given is '{}'".format(type(code)))
 
         self._initialize()
+        self.logger.debug("Sending code '{}'".format(code))
         return any([self.rf_device.tx_code(code) for _ in range(5)])
 
     def switch_device(self, device, on):
@@ -74,6 +76,10 @@ class RC433(object):
         Returns:
             Returns True if the underlying RFDevice acknowledged; otherwise False.
         """
+        self.logger.debug("Device switch for '{}' to '{}' requested".format(str(device), str(on)))
+        if isinstance(device, StatefulDevice):
+            # Unpack the actual device from the Stateful device wrapper
+            device = device.device
         if isinstance(device, CodeDevice):
             return self.send_code(device.code_on if on else device.code_off)
 
