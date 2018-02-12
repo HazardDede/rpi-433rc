@@ -31,7 +31,7 @@ def test_list(flask_client, mocked_device_db):
         "state": "on"
     }] == json.loads(resp.data.decode("utf-8"))
 
-    mocked_device_db.list.assert_called_once()
+    assert mocked_device_db.list.call_count == 1
 
 
 def test_lookup(flask_client, mocked_device_db):
@@ -56,9 +56,9 @@ def test_switch_on(flask_client, mocked_device_db, mocked_rfdevice):
     assert resp.status_code == 200
     assert resp.content_type == 'application/json'
 
-    assert {"state": "on", "result": True} == json.loads(resp.data)
+    assert {"state": "on", "result": True} == json.loads(resp.data.decode("utf-8"))
 
-    mocked_device_db.switch.assert_called()
+    assert mocked_device_db.switch.call_count >= 1
 
 
 def test_switch_off(flask_client, mocked_device_db, mocked_rfdevice):
@@ -68,4 +68,4 @@ def test_switch_off(flask_client, mocked_device_db, mocked_rfdevice):
 
     assert {"state": "off", "result": True} == json.loads(resp.data.decode("utf-8"))
 
-    mocked_device_db.switch.assert_called()
+    assert mocked_device_db.switch.call_count >= 1
