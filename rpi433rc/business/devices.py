@@ -138,9 +138,9 @@ class DeviceDict(DeviceStore):
         ...     'device2': {"system_code": "00010", "device_code": "2"}
         ... }
         >>> dut = DeviceDict(device_dict)
-        >>> dut.list() == [CodeDevice(device_name='device1', code_on=12345, code_off=23456),
-        ...     SystemDevice(device_name='device2', system_code='00010', device_code=2)]
-        True
+        >>> sorted(dut.list(), key=lambda e: e.device_name)
+        [CodeDevice(device_name='device1', code_on=12345, code_off=23456), SystemDevice(device_name='device2', system_code='00010', device_code=2)]
+
         >>> dut.lookup('device1')
         CodeDevice(device_name='device1', code_on=12345, code_off=23456)
 
@@ -154,7 +154,7 @@ class DeviceDict(DeviceStore):
         >>> with open(fn, 'w') as fp:
         ...     json.dump(device_dict, fp)
         >>> dut = DeviceDict.from_json(fn)
-        >>> dut.list()
+        >>> sorted(dut.list(), key=lambda e: e.device_name)
         [CodeDevice(device_name='device1', code_on=12345, code_off=23456), SystemDevice(device_name='device2', system_code='00010', device_code=2)]
     """
     device_dict = attr.ib(validator=attr.validators.instance_of(dict))
@@ -332,7 +332,7 @@ class DeviceRegistry(DeviceStore, DeviceState):
         >>> dstate = MemoryState()  # Instantiate the device state
         >>> dut = DeviceRegistry(dstore, dstate)
 
-        >>> dut.list()
+        >>> sorted(dut.list(), key=lambda e: e.device.device_name)
         [StatefulDevice(device=CodeDevice(device_name='device1', code_on=12345, code_off=23456), state=False), StatefulDevice(device=SystemDevice(device_name='device2', system_code='00010', device_code=2), state=False)]
 
         >>> dut.lookup('device1'), dut.switch('device1', True), dut.lookup('device1')
