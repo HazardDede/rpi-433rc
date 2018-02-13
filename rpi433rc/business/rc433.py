@@ -4,7 +4,8 @@ from .devices import CodeDevice, StatefulDevice
 from .util import LogMixin
 
 try:
-    from rpi_rf import RFDevice
+    import rpi_rf
+    RFDevice = rpi_rf.RFDevice
 except ImportError:
     # Mock it on non-rpi machines
     class RFDevice(object):
