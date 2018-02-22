@@ -4,8 +4,8 @@ from flask_restplus import Api
 
 from ..business.devices import DeviceDict, MemoryState, DeviceRegistry
 from ..business.rc433 import RC433
-from ..config import VERSION, GPIO_OUT, CONFIG_DIR
 
+from ..config import VERSION
 api = Api(
     title='RPi433',
     version=VERSION,
@@ -21,6 +21,7 @@ api.add_namespace(ns_devices)
 from .send import api as ns_send
 api.add_namespace(ns_send)
 
+from ..config import GPIO_OUT, CONFIG_DIR
 config_file = os.path.join(CONFIG_DIR, 'devices.json')
 device_store = DeviceDict.from_json(config_file)
 device_state = MemoryState()

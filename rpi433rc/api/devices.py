@@ -1,7 +1,7 @@
 from flask_restplus import Resource, Namespace, fields
 
 from .flaskutil import fields as _fields
-
+from .flaskutil.auth import requires_auth
 from ..business.devices import UnknownDeviceError
 from ..business.rc433 import UnsupportedDeviceError
 
@@ -30,6 +30,7 @@ device = api.model('Device', {
 @api.route('/')
 @api.route('/list')
 class DeviceList(Resource):
+    @requires_auth
     @api.marshal_with(device)
     def get(self):
         from . import device_db
@@ -39,6 +40,7 @@ class DeviceList(Resource):
 
 @api.route('/<string:device_name>')
 class DeviceLookup(Resource):
+    @requires_auth
     @api.marshal_with(device)
     def get(self, device_name):
         from . import device_db
@@ -47,6 +49,7 @@ class DeviceLookup(Resource):
 
 @api.route('/<string:device_name>/<on_off:on_off>')
 class DeviceSwitch(Resource):
+    @requires_auth
     @api.marshal_with(state)
     def get(self, device_name, on_off):
         from . import device_db

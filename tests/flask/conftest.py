@@ -1,25 +1,31 @@
 import pytest
 
-from rpi433rc.app import app
-from rpi433rc.business.devices import StatefulDevice, CodeDevice, SystemDevice
-import rpi433rc.business.rc433 as rc433
-import rpi433rc.api as api
 
+@pytest.fixture(scope='function')
+def flask_client():
+    from rpi433rc.app import app
+    import rpi433rc.config as cfg
+    cfg.AUTH_USER = None
 
-@pytest.yield_fixture(scope='session')
-def flask_app():
     with app.app_context():
-        yield app
+        yield app.test_client()
 
 
-@pytest.fixture(scope='session')
-def flask_client(flask_app):
-    # flask_app.response_class = utils.JSONResponse
-    return flask_app.test_client()
+@pytest.fixture(scope='function')
+def flask_client_with_auth():
+    from rpi433rc.app import app
+    import rpi433rc.config as cfg
+    cfg.AUTH_USER = "admin"
+    cfg.AUTH_PW = "12345"
+
+    with app.app_context():
+        yield app.test_client()
 
 
 @pytest.yield_fixture(scope='function')
 def mocked_rfdevice(mocker):
+
+    import rpi433rc.business.rc433 as rc433
     mocker.patch.object(rc433.RFDevice, 'enable_tx')
     mocker.patch.object(rc433.RFDevice, 'tx_code')
     mocker.patch.object(rc433.RFDevice, 'cleanup')
@@ -32,10 +38,12 @@ def mocked_rfdevice(mocker):
 
 @pytest.yield_fixture(scope='function')
 def mocked_device_db(mocker):
+    import rpi433rc.api as api
     mocker.patch.object(api.device_db, 'list')
     mocker.patch.object(api.device_db, 'lookup')
     mocker.patch.object(api.device_db, 'switch')
 
+    from rpi433rc.business.devices import StatefulDevice, CodeDevice, SystemDevice
     api.device_db.list.return_value = [
         StatefulDevice(device=CodeDevice('device1', code_on=12345, code_off=23456), state=False),
         StatefulDevice(device=CodeDevice('device2', code_on=12345, code_off=23456), state=True),

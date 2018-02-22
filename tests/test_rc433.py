@@ -1,8 +1,5 @@
 import pytest
 
-from rpi433rc.business.devices import CodeDevice, SystemDevice
-from rpi433rc.business.rc433 import RC433, UnsupportedDeviceError
-
 
 class RFDeviceDummy(object):
     def __init__(self, *args, **kwargs):
@@ -19,6 +16,7 @@ class RFDeviceDummy(object):
 
 
 def test_send_code():
+    from rpi433rc.business.rc433 import RC433
     dut = RC433(gpio_out=17)
     dut.rf_device = RFDeviceDummy()
 
@@ -28,6 +26,9 @@ def test_send_code():
 
 
 def test_switch_device():
+    from rpi433rc.business.devices import CodeDevice, SystemDevice
+    from rpi433rc.business.rc433 import RC433, UnsupportedDeviceError
+
     dut = RC433(gpio_out=17)
     dut.rf_device = RFDeviceDummy()
 

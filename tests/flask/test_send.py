@@ -9,3 +9,4 @@ def test_send_code(flask_client, mocked_rfdevice):
 
     # mocked_rfdevice.enable_tx.assert_called()
     mocked_rfdevice.tx_code.assert_called_with(12345)
+
