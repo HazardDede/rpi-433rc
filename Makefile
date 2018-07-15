@@ -25,8 +25,11 @@ clean-build:
 
 clean: clean-pyc clean-build
 
+pin:
+		pip-compile --output-file requirements.txt requirements.in
+
 lint:
-		flake8 --exclude=.tox --max-line-length 120 $(SOURCE_PATH)
+		flake8 --exclude=.tox --max-line-length 120 --ignore=E402 $(SOURCE_PATH)
 
 test:
 		pytest --verbose --color=yes -s \
@@ -36,3 +39,6 @@ test:
 
 doctest:
 		pytest --verbose --color=yes --doctest-modules $(SOURCE_PATH)
+
+gunicorn:
+		gunicorn --bind 0.0.0.0:5000 wsgi

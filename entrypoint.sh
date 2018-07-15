@@ -6,7 +6,7 @@ case ${1} in
       exec rpi-rf_receive "$@"
       ;;
     serve)
-      exec flask run --host=0.0.0.0
+      exec gunicorn --workers 4 --bind 0.0.0.0:5000 ${FLASK_MODULE}
       ;;
     *)
       exec "$@"

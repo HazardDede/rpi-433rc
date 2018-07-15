@@ -138,8 +138,10 @@ class DeviceDict(DeviceStore):
         ...     'device2': {"system_code": "00010", "device_code": "2"}
         ... }
         >>> dut = DeviceDict(device_dict)
-        >>> sorted(dut.list(), key=lambda e: e.device_name)
-        [CodeDevice(device_name='device1', code_on=12345, code_off=23456), SystemDevice(device_name='device2', system_code='00010', device_code=2)]
+        >>> (sorted(dut.list(), key=lambda e: e.device_name) ==
+        ...     [CodeDevice(device_name='device1', code_on=12345, code_off=23456),
+        ...     SystemDevice(device_name='device2', system_code='00010', device_code=2)])
+        True
 
         >>> dut.lookup('device1')
         CodeDevice(device_name='device1', code_on=12345, code_off=23456)
@@ -154,8 +156,10 @@ class DeviceDict(DeviceStore):
         >>> with open(fn, 'w') as fp:
         ...     json.dump(device_dict, fp)
         >>> dut = DeviceDict.from_json(fn)
-        >>> sorted(dut.list(), key=lambda e: e.device_name)
-        [CodeDevice(device_name='device1', code_on=12345, code_off=23456), SystemDevice(device_name='device2', system_code='00010', device_code=2)]
+        >>> (sorted(dut.list(), key=lambda e: e.device_name) ==
+        ...     [CodeDevice(device_name='device1', code_on=12345, code_off=23456),
+        ...     SystemDevice(device_name='device2', system_code='00010', device_code=2)])
+        True
     """
     device_dict = attr.ib(validator=attr.validators.instance_of(dict))
     devices = attr.ib(default=None, repr=False, cmp=False, hash=False, init=False)
@@ -192,7 +196,7 @@ class DeviceDict(DeviceStore):
             for dev in __ALL_DEVICES__:
                 try:
                     return dev.from_props(device_name, props)
-                except:
+                except (TypeError, ValueError):
                     # import traceback
                     # traceback.print_exc()
                     pass
@@ -332,11 +336,17 @@ class DeviceRegistry(DeviceStore, DeviceState):
         >>> dstate = MemoryState()  # Instantiate the device state
         >>> dut = DeviceRegistry(dstore, dstate)
 
-        >>> sorted(dut.list(), key=lambda e: e.device.device_name)
-        [StatefulDevice(device=CodeDevice(device_name='device1', code_on=12345, code_off=23456), state=False), StatefulDevice(device=SystemDevice(device_name='device2', system_code='00010', device_code=2), state=False)]
+        >>> (sorted(dut.list(), key=lambda e: e.device.device_name) ==
+        ...     [StatefulDevice(device=CodeDevice(device_name='device1', code_on=12345, code_off=23456), state=False),
+        ...     StatefulDevice(device=SystemDevice(device_name='device2', system_code='00010', device_code=2)
+        ...     , state=False)])
+        True
 
-        >>> dut.lookup('device1'), dut.switch('device1', True), dut.lookup('device1')
-        (StatefulDevice(device=CodeDevice(device_name='device1', code_on=12345, code_off=23456), state=False), None, StatefulDevice(device=CodeDevice(device_name='device1', code_on=12345, code_off=23456), state=True))
+        >>> ((dut.lookup('device1'), dut.switch('device1', True), dut.lookup('device1')) ==
+        ...     (StatefulDevice(device=CodeDevice(device_name='device1', code_on=12345, code_off=23456), state=False),
+        ...     None,
+        ...     StatefulDevice(device=CodeDevice(device_name='device1', code_on=12345, code_off=23456), state=True)))
+        True
 
     """
     device_store = attr.ib(validator=attr.validators.instance_of(DeviceStore))

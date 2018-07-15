@@ -1,5 +1,6 @@
 attrs
 flask
 flask-restplus
+gunicorn
 schema
 rpi-rf
