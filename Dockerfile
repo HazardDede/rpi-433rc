@@ -1,6 +1,4 @@
-FROM arm32v7/python:3.6-jessie
-
-ENV RPIRF_VERSION 0.9.6
+FROM arm32v7/python:3.6-slim-stretch
 
 # Setup workdir
 ENV WORKDIR /rpi-433rc
