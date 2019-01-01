@@ -1,3 +1,4 @@
+bumpversion
 pip-tools
 pytest
 pytest-cov

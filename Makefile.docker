@@ -1,7 +1,7 @@
 .PHONY: clean build
 
 RELEASE_IMAGE_NAME = rpi-433rc
-CURRENT_TAG = latest
+CURRENT_TAG = 1.0.0
 
 CONTAINER_NAME = rpi-433rc
 
