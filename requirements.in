@@ -2,5 +2,6 @@ attrs
 flask
 flask-restplus
 gunicorn
+paho-mqtt
 schema
 rpi-rf

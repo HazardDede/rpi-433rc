@@ -54,9 +54,12 @@ class DeviceSwitch(Resource):
     def get(self, device_name, on_off):
         from . import device_db
         from . import rc433
+        from . import publisher
+
         device = device_db.lookup(device_name)
         res = rc433.switch_device(device, on_off)
         if res:
             # Mark the device as on resp. off
             device_db.switch(device_name, on_off)
+            publisher.publish(device_name, on_off)
         return {'state': on_off, 'result': res}

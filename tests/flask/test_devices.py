@@ -1,7 +1,7 @@
 import json
 
 
-def test_list(flask_client, mocked_device_db):
+def test_list(flask_client, mocked_device_db, mocked_publisher):
     resp = flask_client.get('/devices/list', headers={'Accept': 'application/json'})
     assert resp.status_code == 200
     assert resp.content_type == 'application/json'
@@ -10,7 +10,8 @@ def test_list(flask_client, mocked_device_db):
         "type": "CodeDevice",
         "configuration": {
             "code_on": 12345,
-            "code_off": 23456
+            "code_off": 23456,
+            "resend": 3
         },
         "state": "off"
     }, {
@@ -18,7 +19,8 @@ def test_list(flask_client, mocked_device_db):
         "type": "CodeDevice",
         "configuration": {
             "code_on": 12345,
-            "code_off": 23456
+            "code_off": 23456,
+            "resend": 3
         },
         "state": "on"
     }, {
@@ -26,7 +28,8 @@ def test_list(flask_client, mocked_device_db):
         "type": "SystemDevice",
         "configuration": {
             "system_code": "00001",
-            "device_code": 4
+            "device_code": 4,
+            "resend": 3
         },
         "state": "on"
     }] == json.loads(resp.data.decode("utf-8"))
@@ -34,7 +37,7 @@ def test_list(flask_client, mocked_device_db):
     assert mocked_device_db.list.call_count == 1
 
 
-def test_lookup(flask_client, mocked_device_db):
+def test_lookup(flask_client, mocked_device_db, mocked_publisher):
     resp = flask_client.get('/devices/device1', headers={'Accept': 'application/json'})
     assert resp.status_code == 200
     assert resp.content_type == 'application/json'
@@ -43,7 +46,8 @@ def test_lookup(flask_client, mocked_device_db):
         "type": "CodeDevice",
         "configuration": {
             "code_on": 12345,
-            "code_off": 23456
+            "code_off": 23456,
+            "resend": 3
         },
         "state": "off"
     } == json.loads(resp.data.decode("utf-8"))
@@ -51,7 +55,7 @@ def test_lookup(flask_client, mocked_device_db):
     mocked_device_db.lookup.assert_called_with("device1")
 
 
-def test_switch_on(flask_client, mocked_device_db, mocked_rfdevice):
+def test_switch_on(flask_client, mocked_device_db, mocked_rfdevice, mocked_publisher):
     resp = flask_client.get('/devices/device1/on', headers={'Accept': 'application/json'})
     assert resp.status_code == 200
     assert resp.content_type == 'application/json'
@@ -61,7 +65,7 @@ def test_switch_on(flask_client, mocked_device_db, mocked_rfdevice):
     assert mocked_device_db.switch.call_count >= 1
 
 
-def test_switch_off(flask_client, mocked_device_db, mocked_rfdevice):
+def test_switch_off(flask_client, mocked_device_db, mocked_rfdevice, mocked_publisher):
     resp = flask_client.get('/devices/device1/off', headers={'Accept': 'application/json'})
     assert resp.status_code == 200
     assert resp.content_type == 'application/json'

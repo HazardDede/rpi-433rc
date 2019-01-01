@@ -53,3 +53,11 @@ def mocked_device_db(mocker):
     api.device_db.switch.return_value = None
 
     yield api.device_db
+
+
+@pytest.yield_fixture(scope='function')
+def mocked_publisher(mocker):
+    import rpi433rc.api as api
+    mocker.patch.object(api.publisher, 'publish')
+
+    yield api.publisher

@@ -4,6 +4,7 @@ from flask_restplus import Api
 
 from ..business.devices import DeviceDict, MemoryState, DeviceRegistry
 from ..business.rc433 import RC433
+from ..business.publish import from_config
 
 from ..config import VERSION
 api = Api(
@@ -28,3 +29,4 @@ device_state = MemoryState()
 device_db = DeviceRegistry(device_store, device_state)
 
 rc433 = RC433(gpio_out=GPIO_OUT)
+publisher = from_config()
