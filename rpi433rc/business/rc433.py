@@ -47,22 +47,29 @@ class RC433(LogMixin):
             self.rf_device.cleanup()
             self.rf_device = None
 
-    def send_code(self, code):
+    def send_code(self, code, times=3):
         """
-        Sends a decimal code via 433mhz. This implementation will actually send the code five times
+        Sends a decimal code via 433mhz. This implementation will actually send the code multiple times
         to make sure that any disturbance in the force has less impact.
+
         Args:
             code (int): Code to send
+            times (int):
 
         Returns:
             Returns True if the underlying RFDevice acknowledged; otherwise False.
         """
         if not isinstance(code, int):
             raise TypeError("Argument code is expected to be an int, but given is '{}'".format(type(code)))
+        if not isinstance(times, int):
+            raise TypeError("Argument times is expected to be an int, but is '{}'".format(type(times)))
+
+        if times <= 0:
+            times = 1
 
         self._initialize()
-        self.logger.debug("Sending code '{}'".format(code))
-        return any([self.rf_device.tx_code(code) for _ in range(5)])
+        self.logger.debug("Sending code '{}' for {} times".format(code, str(times)))
+        return any([self.rf_device.tx_code(code) for _ in range(times)])
 
     def switch_device(self, device, on):
         """
@@ -82,6 +89,6 @@ class RC433(LogMixin):
             # Unpack the actual device from the Stateful device wrapper
             device = device.device
         if isinstance(device, CodeDevice):
-            return self.send_code(device.code_on if on else device.code_off)
+            return self.send_code(device.code_on if on else device.code_off, times=device.resend)
 
         raise UnsupportedDeviceError("The device type '{}' is not supported".format(str(type(device))))

@@ -1,7 +1,8 @@
 {
   "miffy": {
     "code_on": 70997,
-    "code_off": 12653909
+    "code_off": 12653909,
+    "resend": 5
   },
   "moon": {
     "code_on": 333141,

@@ -4,7 +4,7 @@ from collections import defaultdict
 
 import attr
 
-from schema import Schema, Or, Use
+from schema import Schema, Or, Use, Optional
 
 from .util import LogMixin
 
@@ -24,10 +24,10 @@ class Device(object):
         >>> print(repr(d1))
         Device(device_name='device1')
 
-        >>> Device.props() == {'device_name': str}
+        >>> Device.props() == {'device_name': (str, None)}
         True
     """
-    device_name = attr.ib(convert=str)
+    device_name = attr.ib(converter=str)
 
     @property
     def configuration(self):
@@ -35,7 +35,7 @@ class Device(object):
 
     @classmethod
     def props(cls):
-        return {attr.name: attr.converter for attr in cls.__attrs_attrs__}
+        return {a.name: (a.converter, None if a.default is attr.NOTHING else a.default) for a in cls.__attrs_attrs__}
 
     @classmethod
     def from_props(cls, device_name, props):
@@ -49,15 +49,17 @@ class CodeDevice(Device):
 
     Example:
 
-        >>> d2 = CodeDevice(device_name='device2', code_on="12345", code_off=23456)
+        >>> d2 = CodeDevice(device_name='device2', code_on="12345", code_off=23456, resend=1)
         >>> print(repr(d2))
-        CodeDevice(device_name='device2', code_on=12345, code_off=23456)
+        CodeDevice(device_name='device2', code_on=12345, code_off=23456, resend=1)
 
-        >>> CodeDevice.props() == {'device_name': str, 'code_on': int, 'code_off': int}
+        >>> CodeDevice.props() == {'device_name': (str, None), 'code_on': (int, None),
+        ...                        'code_off': (int, None), 'resend': (int, 3)}
         True
     """
     code_on = attr.ib(converter=int)
     code_off = attr.ib(converter=int)
+    resend = attr.ib(converter=int, validator=lambda i, a, v: v > 0, default=3)
 
 
 @attr.s
@@ -69,13 +71,15 @@ class SystemDevice(Device):
 
         >>> d3 = SystemDevice(device_name='device3', system_code="00111", device_code="4")
         >>> print(repr(d3))
-        SystemDevice(device_name='device3', system_code='00111', device_code=4)
+        SystemDevice(device_name='device3', system_code='00111', device_code=4, resend=3)
 
-        >>> SystemDevice.props() == {'device_name': str, 'system_code': str, 'device_code': int}
+        >>> SystemDevice.props() == {'device_name': (str, None), 'system_code': (str, None),
+        ...                          'device_code': (int, None), 'resend': (int, 3)}
         True
     """
     system_code = attr.ib(converter=str)
     device_code = attr.ib(converter=int)
+    resend = attr.ib(converter=int, validator=lambda i, a, v: v > 0, default=3)
 
 
 @attr.s
@@ -144,7 +148,7 @@ class DeviceDict(DeviceStore):
         True
 
         >>> dut.lookup('device1')
-        CodeDevice(device_name='device1', code_on=12345, code_off=23456)
+        CodeDevice(device_name='device1', code_on=12345, code_off=23456, resend=3)
 
         >>> dut.lookup('unknown')
         Traceback (most recent call last):
@@ -169,7 +173,10 @@ class DeviceDict(DeviceStore):
         device_schemas = list()
         for dev in __ALL_DEVICES__:
             props = dev.props()
-            device_schemas.append({k: Use(v) for k, v in props.items() if k != 'device_name'})
+            device_schemas.append({
+                k if default is None else Optional(k, default=default): Use(conv)
+                for k, (conv, default) in props.items() if k != 'device_name'
+            })
 
         return Schema({
             str: Or(*device_schemas)
