@@ -1,5 +1,5 @@
 attrs
-flask
+flask>=0.12.3
 flask-restplus
 gunicorn
 paho-mqtt

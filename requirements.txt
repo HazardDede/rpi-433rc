@@ -10,7 +10,7 @@ aniso8601==2.0.0          # via flask-restplus
 attrs==17.4.0
 click==6.7                # via flask
 flask-restplus==0.10.1
-flask==0.12.2
+flask==1.0.2
 gunicorn==19.9.0
 itsdangerous==0.24        # via flask
 jinja2==2.10              # via flask
