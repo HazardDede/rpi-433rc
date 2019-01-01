@@ -7,7 +7,9 @@ RUN mkdir -p ${WORKDIR} && \
 
 # Install rest-api wrapper for rpi-rf
 COPY . ${WORKDIR}
-RUN pip3 install -r ${WORKDIR}/requirements.txt
+RUN pip3 install \
+    --extra-index-url https://www.piwheels.hostedpi.com/simple \
+    -r ${WORKDIR}/requirements.txt
 # Setting correct entrypoint
 # ENV FLASK_APP ${WORKDIR}/rpi433rc/app.py
 ENV PYTHONPATH=${WORKDIR}
