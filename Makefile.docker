@@ -1,6 +1,6 @@
 .PHONY: clean build
 
-RELEASE_IMAGE_NAME = rpi-433rc
+RELEASE_IMAGE_NAME = hazard/rpi-433rc
 CURRENT_TAG = 1.0.0
 
 CONTAINER_NAME = rpi-433rc
@@ -26,6 +26,11 @@ sniff: build
 	    --name $(CONTAINER_NAME) \
 	    --privileged --cap-add SYS_RAWIO --device=/dev/mem \
 	    $(RELEASE_IMAGE_NAME):$(CURRENT_TAG) sniff
+
+push: build
+    docker push $(RELEASE_IMAGE_NAME):$(CURRENT_TAG)
+    docker tag $(RELEASE_IMAGE_NAME):$(CURRENT_TAG) $(RELEASE_IMAGE_NAME):latest
+    docker push $(RELEASE_IMAGE_NAME):latest
 
 clean:
 	docker ps -a | grep '$(CONTAINER_NAME)' | awk '{print $$1}' | xargs docker rm
