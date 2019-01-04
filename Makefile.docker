@@ -2,36 +2,38 @@
 
 RELEASE_IMAGE_NAME = hazard/rpi-433rc
 CURRENT_TAG = 1.0.0
+FULL_RELEASE_IMAGE = $(RELEASE_IMAGE_NAME):$(CURRENT_TAG)
+FULL_RELEASE_IMAGE_LATEST = $(RELEASE_IMAGE_NAME):latest
 
 CONTAINER_NAME = rpi-433rc
 
 build:
-	docker build -t $(RELEASE_IMAGE_NAME):$(CURRENT_TAG) .
+	docker build -t $(FULL_RELEASE_IMAGE) .
 
 shell: build
 	docker run -it --rm \
 	    --name $(CONTAINER_NAME) \
 	    --privileged --cap-add SYS_RAWIO --device=/dev/mem \
-	    $(RELEASE_IMAGE_NAME):$(CURRENT_TAG) bash
+	    $(FULL_RELEASE_IMAGE) bash
 
 run: build
 	docker run --rm \
 	    --name $(CONTAINER_NAME) \
 	    -p "5555:5000" \
 	    --privileged --cap-add SYS_RAWIO --device=/dev/mem \
-	    $(RELEASE_IMAGE_NAME):$(CURRENT_TAG) serve
+	    $(FULL_RELEASE_IMAGE) serve
 
 sniff: build
 	docker run --rm -it \
 	    --name $(CONTAINER_NAME) \
 	    --privileged --cap-add SYS_RAWIO --device=/dev/mem \
-	    $(RELEASE_IMAGE_NAME):$(CURRENT_TAG) sniff
+	    $(FULL_RELEASE_IMAGE) sniff
 
 push: build
-    docker push $(RELEASE_IMAGE_NAME):$(CURRENT_TAG)
-    docker tag $(RELEASE_IMAGE_NAME):$(CURRENT_TAG) $(RELEASE_IMAGE_NAME):latest
-    docker push $(RELEASE_IMAGE_NAME):latest
+    docker push $(FULL_RELEASE_IMAGE)
+    $(docker tag $(FULL_RELEASE_IMAGE) $(FULL_RELEASE_IMAGE_LATEST))
+    docker push $(FULL_RELEASE_IMAGE_LATEST)
 
 clean:
 	docker ps -a | grep '$(CONTAINER_NAME)' | awk '{print $$1}' | xargs docker rm
-	if [ $(shell docker image inspect $(RELEASE_IMAGE_NAME):$(CURRENT_TAG) > /dev/null 2>/dev/null ; echo $$?) -eq 0 ] ; then docker rmi $(RELEASE_IMAGE_NAME):$(CURRENT_TAG) ; fi
+	if [ $(shell docker image inspect $(FULL_RELEASE_IMAGE) > /dev/null 2>/dev/null ; echo $$?) -eq 0 ] ; then docker rmi $(RELEASE_IMAGE_NAME):$(CURRENT_TAG) ; fi
