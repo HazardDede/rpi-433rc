@@ -1,6 +1,6 @@
 # rpi-433rc
 
-Raspberry docker image to sniff and remote control 433mhz sockets by rest interface
+> Raspberry docker image to sniff and remote control 433mhz sockets by rest interface
 
 ## Background
 
@@ -28,7 +28,7 @@ Fire up a container to sniff the codes:
     docker run --rm -it \
 	    --name sniffy \
 	    --privileged --cap-add SYS_RAWIO --device=/dev/mem \
-	    rpi-433rc:latest sniff -g 27
+	    hazard/rpi-433rc:latest sniff -g 27
 	    
 You should see that the sniffing tool has started. If your gpio pin is not 27 (default), you can pass a different one.
 Push the buttons on your remote control like a madman and note the results for the different devices (on / off codes).
@@ -64,8 +64,8 @@ Easy one, too:
         -e GPIO_OUT=17 \
         -v <path/to/your/device.json>:/conf/devices.json \
         --privileged --cap-add SYS_RAWIO --device=/dev/mem \
-        rpi-433rc:latest serve
+        hazard/rpi-433rc:latest serve
         
 You can change the GPIO_OUT if you are using a different one than me.
 Nicely done. Thanks to port forwarding you should see the swagger ui when navigating to the url [http://<raspi-ip>:5555](http://<raspi-ip>:5555).
-Feel free to try it the different endpoints.
+Feel free to try the different endpoints.
