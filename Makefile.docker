@@ -30,9 +30,9 @@ sniff: build
 	    $(FULL_RELEASE_IMAGE) sniff
 
 push: build
-    docker push $(FULL_RELEASE_IMAGE)
-    $(docker tag $(FULL_RELEASE_IMAGE) $(FULL_RELEASE_IMAGE_LATEST))
-    docker push $(FULL_RELEASE_IMAGE_LATEST)
+	docker push $(FULL_RELEASE_IMAGE)
+	docker tag $(FULL_RELEASE_IMAGE) $(FULL_RELEASE_IMAGE_LATEST)
+	docker push $(FULL_RELEASE_IMAGE_LATEST)
 
 clean:
 	docker ps -a | grep '$(CONTAINER_NAME)' | awk '{print $$1}' | xargs docker rm
