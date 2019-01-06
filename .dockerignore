@@ -21,5 +21,3 @@ requirements-dev.txt
 *.iml
 **/*.pyc
 **/__pycache__
-
-
