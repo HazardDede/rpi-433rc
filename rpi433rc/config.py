@@ -1,7 +1,7 @@
 import os
 
 # Version
-VERSION = '1.0.0'
+VERSION = '1.0.1'
 
 # General
 GPIO_OUT = int(os.environ.get('GPIO_OUT', 17))

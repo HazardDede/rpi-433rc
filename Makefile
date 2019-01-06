@@ -1,7 +1,7 @@
 .PHONY: clean-pyc clean-build clean docs lint test doctest version gunicorn
 
 # Setup
-VERSION=1.0.0
+VERSION=1.0.1
 SOURCE_PATH=./rpi433rc
 TEST_PATH=./tests
 
