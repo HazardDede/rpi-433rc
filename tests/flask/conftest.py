@@ -43,21 +43,22 @@ def mocked_device_db(mocker):
     mocker.patch.object(api.device_db, 'lookup')
     mocker.patch.object(api.device_db, 'switch')
 
-    from rpi433rc.business.devices import StatefulDevice, CodeDevice, SystemDevice
+    from rpi433rc.business.devices import CodeDevice, SystemDevice
+    from rpi433rc.business.registry import StatefulDevice
     api.device_db.list.return_value = [
         StatefulDevice(device=CodeDevice('device1', code_on=12345, code_off=23456), state=False),
         StatefulDevice(device=CodeDevice('device2', code_on=12345, code_off=23456), state=True),
         StatefulDevice(device=SystemDevice('device3', system_code="00001", device_code=4), state=True),
     ]
     api.device_db.lookup.return_value = StatefulDevice(device=CodeDevice('device1', code_on=12345, code_off=23456), state=False)
-    api.device_db.switch.return_value = None
+    api.device_db.switch.return_value = True
 
     yield api.device_db
 
 
-@pytest.yield_fixture(scope='function')
-def mocked_publisher(mocker):
-    import rpi433rc.api as api
-    mocker.patch.object(api.publisher, 'publish')
-
-    yield api.publisher
+# @pytest.yield_fixture(scope='function')
+# def mocked_publisher(mocker):
+#     import rpi433rc.api as api
+#     mocker.patch.object(api.publisher, 'publish')
+#
+#     yield api.publisher

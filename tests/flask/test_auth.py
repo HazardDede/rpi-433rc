@@ -10,7 +10,7 @@ import pytest
     ('/send/12345', 200, 401),
     ('/version/', 200, 200)
 ])
-def test_send_code_with_auth(path, auth_code, non_auth_code, flask_client_with_auth, mocked_rfdevice, mocked_device_db, mocked_publisher):
+def test_send_code_with_auth(path, auth_code, non_auth_code, flask_client_with_auth, mocked_rfdevice, mocked_device_db):
     resp = flask_client_with_auth.get(path, headers={
         'Accept': 'application/json',
         'Authorization': 'Basic ' + base64.b64encode(b'admin:12345').decode('ascii')

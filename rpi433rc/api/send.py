@@ -16,5 +16,5 @@ class SendCode(Resource):
     @requires_auth
     @api.marshal_with(code)
     def get(self, code):
-        from . import rc433
-        return {'code': code, 'result': rc433.send_code(code)}
+        from . import device_db
+        return {'code': code, 'result': device_db.rc433.send_code(code)}

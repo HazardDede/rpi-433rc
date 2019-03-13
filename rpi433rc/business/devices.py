@@ -1,9 +1,7 @@
 import json
 from abc import abstractmethod
-from collections import defaultdict
 
 import attr
-
 from schema import Schema, Or, Use, Optional
 
 from .util import LogMixin
@@ -80,21 +78,6 @@ class SystemDevice(Device):
     system_code = attr.ib(converter=str)
     device_code = attr.ib(converter=int)
     resend = attr.ib(converter=int, validator=lambda i, a, v: v > 0, default=3)
-
-
-@attr.s
-class StatefulDevice(object):
-    """
-    Adds a state (on resp. off) to a device entity.
-
-    Example:
-
-        >>> device = Device('device1')
-        >>> StatefulDevice(device, True)
-        StatefulDevice(device=Device(device_name='device1'), state=True)
-    """
-    device = attr.ib(validator=attr.validators.instance_of(Device))
-    state = attr.ib(validator=attr.validators.instance_of(bool))
 
 
 __ALL_DEVICES__ = [CodeDevice, SystemDevice]
@@ -244,133 +227,3 @@ class DeviceDict(DeviceStore):
         if res is None:
             raise UnknownDeviceError("The requested device '{}' is unknown".format(device_name))
         return res
-
-
-class DeviceState(object):
-    """
-    Abstract base class for a device state tracker.
-    """
-    def _device_name(self, device_or_name):
-        if isinstance(device_or_name, Device):
-            return device_or_name.device_name
-
-        return device_or_name
-
-    @abstractmethod
-    def lookup(self, device_or_name):
-        """
-        Lookup the state of a single device by the specified name or entity.
-
-        Args:
-            device_or_name: A real device entity (Device) or it's name
-
-        Returns:
-            Returns True if the device is currently on; otherwise False.
-        """
-        pass
-
-    @abstractmethod
-    def switch(self, device_or_name, on):
-        """
-        Switch on / off the specified device.
-
-        Args:
-            device_or_name: A real device entity (Device) or it's name
-            on: If True the device will be marked as on; otherwise off.
-
-        Returns:
-            None
-        """
-        pass
-
-
-class MemoryState(DeviceState):
-    """
-    In-memory implementation of a device state mapping.
-
-    Example:
-
-        >>> dut = MemoryState()
-        >>> dut.lookup(Device('device1'))
-        False
-
-        >>> dut.switch(Device('device2'), True)
-        >>> dut.lookup(Device('device1')), dut.lookup(Device('device2'))
-        (False, True)
-    """
-    def __init__(self):
-        self.states = defaultdict(bool)
-
-    def lookup(self, device_or_name):
-        """
-        Lookup the state of a single device by the specified name or entity.
-
-        Args:
-            device_or_name: A real device entity (Device) or it's name
-
-        Returns:
-            Returns True if the device is currently on; otherwise False.
-        """
-        return self.states.get(self._device_name(device_or_name), False)
-
-    def switch(self, device_or_name, on):
-        """
-        Switch on / off the specified device.
-
-        Args:
-            device_or_name: A real device entity (Device) or it's name
-            on: If True the device will be marked as on; otherwise off.
-
-        Returns:
-            None
-        """
-        self.states[self._device_name(device_or_name)] = on
-
-
-@attr.s
-class DeviceRegistry(DeviceStore, DeviceState):
-    """
-    The device registry associates a DeviceStore (where the actual devices are stored / configured) and
-    a DeviceState (where the state of the devices are tracked).
-
-    Example:
-
-        >>> device_dict = {
-        ...     'device1': {"code_on": 12345, 'code_off': "23456"},
-        ...     'device2': {"system_code": "00010", "device_code": "2"}
-        ... }
-        >>> dstore = DeviceDict(device_dict)  # Instantiate the device store
-        >>> dstate = MemoryState()  # Instantiate the device state
-        >>> dut = DeviceRegistry(dstore, dstate)
-
-        >>> (sorted(dut.list(), key=lambda e: e.device.device_name) ==
-        ...     [StatefulDevice(device=CodeDevice(device_name='device1', code_on=12345, code_off=23456), state=False),
-        ...     StatefulDevice(device=SystemDevice(device_name='device2', system_code='00010', device_code=2)
-        ...     , state=False)])
-        True
-
-        >>> ((dut.lookup('device1'), dut.switch('device1', True), dut.lookup('device1')) ==
-        ...     (StatefulDevice(device=CodeDevice(device_name='device1', code_on=12345, code_off=23456), state=False),
-        ...     None,
-        ...     StatefulDevice(device=CodeDevice(device_name='device1', code_on=12345, code_off=23456), state=True)))
-        True
-
-    """
-    device_store = attr.ib(validator=attr.validators.instance_of(DeviceStore))
-    state = attr.ib(validator=attr.validators.instance_of(DeviceState))
-
-    def lookup(self, device):
-        if not isinstance(device, Device):
-            # Assuming a device name instead of a real device
-            device = self.device_store.lookup(device)
-
-        if device is None:
-            raise UnknownDeviceError("The requested device '{}' is unknown".format(str(device)))
-
-        return StatefulDevice(device=device, state=self.state.lookup(device.device_name))
-
-    def list(self):
-        return [self.lookup(device) for device in self.device_store.list()]
-
-    def switch(self, device_or_name, on):
-        self.state.switch(device_or_name, on)

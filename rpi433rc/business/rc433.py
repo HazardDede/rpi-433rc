@@ -1,25 +1,29 @@
 import attr
 
-from .devices import CodeDevice, StatefulDevice
+from .devices import CodeDevice
 from .util import LogMixin
+
+
+class RFDeviceMock(object):
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def enable_tx(self):
+        pass
+
+    def cleanup(self):
+        pass
+
+    def tx_code(self, code, **kwargs):
+        return True
+
 
 try:
     import rpi_rf
     RFDevice = rpi_rf.RFDevice
 except ImportError:
     # Mock it on non-rpi machines
-    class RFDevice(object):
-        def __init__(self, *args, **kwargs):
-            pass
-
-        def enable_tx(self):
-            pass
-
-        def cleanup(self):
-            pass
-
-        def tx_code(self, code, **kwargs):
-            return True
+    RFDevice = RFDeviceMock
 
 
 class UnsupportedDeviceError(Exception):
@@ -85,6 +89,7 @@ class RC433(LogMixin):
             Returns True if the underlying RFDevice acknowledged; otherwise False.
         """
         self.logger.debug("Device switch for '{}' to '{}' requested".format(str(device), str(on)))
+        from .registry import StatefulDevice
         if isinstance(device, StatefulDevice):
             # Unpack the actual device from the Stateful device wrapper
             device = device.device
