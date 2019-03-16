@@ -1,7 +1,11 @@
+"""Initializes the flask namespaces."""
+# pylint: skip-file
+
 from flask_restplus import Api
 
 from ..config import VERSION
 
+# pylint: disable=invalid-name
 api = Api(
     title='RPi433',
     version=VERSION,

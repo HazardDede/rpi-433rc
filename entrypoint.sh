@@ -6,7 +6,7 @@ case ${1} in
       exec rpi-rf_receive "$@"
       ;;
     serve)
-      exec gunicorn --workers 1 --bind 0.0.0.0:5000 ${FLASK_MODULE}
+      exec ./run.sh
       ;;
     *)
       exec "$@"

@@ -3,7 +3,7 @@ import pytest
 
 @pytest.fixture(scope='function')
 def flask_client():
-    from rpi433rc.app import app
+    from rpi433rc.api.app import app
     import rpi433rc.config as cfg
     cfg.AUTH_USER = None
 
@@ -13,7 +13,7 @@ def flask_client():
 
 @pytest.fixture(scope='function')
 def flask_client_with_auth():
-    from rpi433rc.app import app
+    from rpi433rc.api.app import app
     import rpi433rc.config as cfg
     cfg.AUTH_USER = "admin"
     cfg.AUTH_PW = "12345"
@@ -46,11 +46,11 @@ def mocked_device_db(mocker):
     from rpi433rc.business.devices import CodeDevice, SystemDevice
     from rpi433rc.business.registry import StatefulDevice
     api.device_db.list.return_value = [
-        StatefulDevice(device=CodeDevice('device1', code_on=12345, code_off=23456), state=False),
-        StatefulDevice(device=CodeDevice('device2', code_on=12345, code_off=23456), state=True),
-        StatefulDevice(device=SystemDevice('device3', system_code="00001", device_code=4), state=True),
+        StatefulDevice(device_name='device1', device=CodeDevice('device1', code_on=12345, code_off=23456), state=False),
+        StatefulDevice(device_name='device2', device=CodeDevice('device2', code_on=12345, code_off=23456), state=True),
+        StatefulDevice(device_name='device3', device=SystemDevice('device3', system_code="00001", device_code=4), state=True),
     ]
-    api.device_db.lookup.return_value = StatefulDevice(device=CodeDevice('device1', code_on=12345, code_off=23456), state=False)
+    api.device_db.lookup.return_value = StatefulDevice(device_name='device1', device=CodeDevice('device1', code_on=12345, code_off=23456), state=False)
     api.device_db.switch.return_value = True
 
     yield api.device_db

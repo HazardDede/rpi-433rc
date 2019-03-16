@@ -1,3 +1,5 @@
+"""Provides basic authentication stuff for flask."""
+
 from functools import wraps
 
 from flask import request, Response
@@ -19,13 +21,14 @@ def auth_401():
         {'WWW-Authenticate': 'Basic realm="Login Required"'})
 
 
-def requires_auth(f):
-    @wraps(f)
+def requires_auth(fun):
+    """Decorator to mark endpoints that they require authentication."""
+    @wraps(fun)
     def decorated(*args, **kwargs):
         from ...config import AUTH_USER
         if AUTH_USER is not None:
             auth = request.authorization
             if not auth or not validate_auth(auth.username, auth.password):
                 return auth_401()
-        return f(*args, **kwargs)
+        return fun(*args, **kwargs)
     return decorated

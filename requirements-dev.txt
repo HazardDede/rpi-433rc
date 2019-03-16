@@ -1,5 +1,6 @@
 bumpversion
 pip-tools
+pylint
 pytest
 pytest-cov
 pytest-mock

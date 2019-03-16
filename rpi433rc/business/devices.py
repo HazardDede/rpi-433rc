@@ -1,18 +1,21 @@
+"""Device related business classes."""
+import functools
 import json
 from abc import abstractmethod
 
 import attr
 from schema import Schema, Or, Use, Optional
 
-from .util import LogMixin
+from ..util import LogMixin
 
 
 class UnknownDeviceError(Exception):
-    pass
+    """Error to signal a unknown device to the caller."""
+    pass  # pylint: disable=unnecessary-pass
 
 
 @attr.s
-class Device(object):
+class Device:
     """
     Base class for different 433mhz devices.
 
@@ -29,14 +32,24 @@ class Device(object):
 
     @property
     def configuration(self):
-        return {name: getattr(self, name, None) for name, _ in self.props().items() if name != 'device_name'}
+        """Returns the configuration of the device."""
+        return {
+            name: getattr(self, name, None)
+            for name, _ in self.props().items()
+            if name != 'device_name'
+        }
 
     @classmethod
     def props(cls):
-        return {a.name: (a.converter, None if a.default is attr.NOTHING else a.default) for a in cls.__attrs_attrs__}
+        """Returns the valid properties of the device."""
+        return {
+            a.name: (a.converter, None if a.default is attr.NOTHING else a.default)
+            for a in cls.__attrs_attrs__
+        }
 
     @classmethod
     def from_props(cls, device_name, props):
+        """Creates a device from a property dictionary."""
         return cls(device_name=device_name, **props)
 
 
@@ -83,6 +96,46 @@ class SystemDevice(Device):
 __ALL_DEVICES__ = [CodeDevice, SystemDevice]
 
 
+def device_validator(fun):
+    """
+    Adds device specific validation to the decorated function.
+
+    Examples:
+        >>> @device_validator
+        ... def do(device=None, device_name=None):
+        ...    return device, device_name
+
+        >>> from rpi433rc.business.devices import CodeDevice
+        >>> do(device=CodeDevice(code_on=1, code_off=2, resend=2, device_name='d1'))
+        (CodeDevice(device_name='d1', code_on=1, code_off=2, resend=2), 'd1')
+
+        >>> do(device_name='d1')
+        (None, 'd1')
+
+        >>> do(device='d1')  # Bad one: string is no device!
+        Traceback (most recent call last):
+        ...
+        TypeError: Argument 'device' is expected to be an actual `Device`, but it is not.
+
+        >>> do()
+        Traceback (most recent call last):
+        ...
+        TypeError: It is expected either to pass the argument 'device' or ...
+    """
+    @functools.wraps(fun)
+    def _wrap(*args, device=None, device_name=None, **kwargs):
+        if not device and not device_name:
+            raise TypeError("It is expected either to pass the argument 'device' or"
+                            " the argument 'device_name' or both, but not none.")
+        if device and not isinstance(device, Device):
+            raise TypeError("Argument 'device' is expected to be an actual `Device`,"
+                            " but it is not.")
+        device_name = device_name or device.device_name
+        return fun(*args, device=device, device_name=device_name, **kwargs)
+
+    return _wrap
+
+
 @attr.s
 class DeviceStore(LogMixin):
     """
@@ -97,20 +150,21 @@ class DeviceStore(LogMixin):
         Returns:
             Returns a list of all configured devices.
         """
-        pass
+        raise NotImplementedError()
 
     @abstractmethod
-    def lookup(self, device_name):
+    def lookup(self, device=None, device_name=None):
         """
         Lookup a given device by its name.
 
         Args:
+            device: An actual `business.devices.Device` instance.
             device_name (str): Device name to lookup.
 
         Returns:
             Returns the actual device if found; otherwise a `UnknownDeviceError` is raised.
         """
-        pass
+        raise NotImplementedError()
 
 
 @attr.s
@@ -130,10 +184,10 @@ class DeviceDict(DeviceStore):
         ...     SystemDevice(device_name='device2', system_code='00010', device_code=2)])
         True
 
-        >>> dut.lookup('device1')
+        >>> dut.lookup(device_name='device1')
         CodeDevice(device_name='device1', code_on=12345, code_off=23456, resend=3)
 
-        >>> dut.lookup('unknown')
+        >>> dut.lookup(device_name='unknown')
         Traceback (most recent call last):
         ...
         rpi433rc.business.devices.UnknownDeviceError: The requested device 'unknown' is unknown
@@ -153,6 +207,7 @@ class DeviceDict(DeviceStore):
 
     @property
     def validation_schema(self):
+        """Dynamically creates a validation schema for the device."""
         device_schemas = list()
         for dev in __ALL_DEVICES__:
             props = dev.props()
@@ -176,8 +231,8 @@ class DeviceDict(DeviceStore):
         Returns:
             Returns a `DeviceDict` that is initialized from the given json file.
         """
-        with open(file_name, 'r') as fp:
-            jsonf = json.load(fp)
+        with open(file_name, 'r') as fpointer:
+            jsonf = json.load(fpointer)
 
         return DeviceDict(jsonf)
 
@@ -210,16 +265,8 @@ class DeviceDict(DeviceStore):
 
         return [device for _, device in self.devices.items()]
 
-    def lookup(self, device_name):
-        """
-        Lookup a given device by its name.
-
-        Args:
-            device_name (str): Device name to lookup.
-
-        Returns:
-            Returns the actual device if found; otherwise a `UnknownDeviceError` is raised.
-        """
+    @device_validator
+    def lookup(self, device=None, device_name=None):
         if self.devices is None:
             self._init_devices()
 

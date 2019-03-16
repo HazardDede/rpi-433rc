@@ -56,11 +56,9 @@ Where `device1` and `device2` are the actual names of the devices. Be creative ;
 
 Easy one, too:
     
-    # This command 
     docker run --rm \
         --name rpi-433rc \
         -p "5555:5000" \
-        -e CONFIG_DIR=/conf \
         -e GPIO_OUT=17 \
         -v <path/to/your/device.json>:/conf/devices.json \
         --privileged --cap-add SYS_RAWIO --device=/dev/mem \
@@ -69,3 +67,44 @@ Easy one, too:
 You can change the GPIO_OUT if you are using a different one than me.
 Nicely done. Thanks to port forwarding you should see the swagger ui when navigating to the url [http://<raspi-ip>:5555](http://<raspi-ip>:5555).
 Feel free to try the different endpoints.
+
+## Enable mqtt support
+
+You can enable support for state publication to a mqtt broker. Start the container as follows:
+
+    docker run --rm \
+        --name rpi-433rc \
+        -p "5555:5000" \
+        -v <path/to/your/device.json>:/conf/devices.json \
+        --link mqtt:mqtt \
+        -e GPIO_OUT=17 \
+        -e MQTT_HOST=mqtt \
+        -e MQTT_PORT=1883 \
+        -e MQTT_ROOT=rc433 \
+        --privileged --cap-add SYS_RAWIO --device=/dev/mem \
+        hazard/rpi-433rc:latest serve
+        
+Last but no least, you can enable mqtt discovery for [homeassistant](https://www.home-assistant.io). You can find the
+documentation about mqtt discovery [here](https://www.home-assistant.io/docs/mqtt/discovery/).
+
+    docker run --rm \
+        --name rpi-433rc \
+        -p "5555:5000" \
+        -v <path/to/your/device.json>:/conf/devices.json \
+        --link mqtt:mqtt \
+        -e GPIO_OUT=17 \
+        -e MQTT_HOST=mqtt \
+        -e MQTT_PORT=1883 \
+        -e MQTT_ROOT=rc433 \
+        -e MQTT_DISCOVERY=1 \
+        --privileged --cap-add SYS_RAWIO --device=/dev/mem \
+        hazard/rpi-433rc:latest serve
+        
+Please configure your `MQTT_ROOT` to match your discovery topic root in homeassistant. All devices will be published 
+as switches matching the following topic pattern:
+
+    <MQTT_ROOT>/switch/<DEVICE_NAME>/[state, config, set]
+    
+Topic `state` is for state publications, `config` is for automatic entity configuration (will be done automatically) and
+`set` is the command topic where homeassistant (or others) can publish `on` / `off` to switch the device to the specified
+state.

@@ -1,26 +1,29 @@
+"""RC433 related components. The heart to control 433mhz power sockets."""
+
 import attr
 
+from rpi433rc.util import LogMixin
 from .devices import CodeDevice
-from .util import LogMixin
 
 
-class RFDeviceMock(object):
+class RFDeviceMock:
+    """Mocking the class inside package rpi_rf if it is not available."""
     def __init__(self, *args, **kwargs):
         pass
 
-    def enable_tx(self):
+    def enable_tx(self):  # pylint: disable=missing-docstring
         pass
 
-    def cleanup(self):
+    def cleanup(self):  # pylint: disable=missing-docstring
         pass
 
-    def tx_code(self, code, **kwargs):
+    def tx_code(self, code, **kwargs):  # pylint: disable=missing-docstring,unused-argument,no-self-use
         return True
 
 
 try:
     import rpi_rf
-    RFDevice = rpi_rf.RFDevice
+    RFDevice = rpi_rf.RFDevice  # pylint: disable=invalid-name
 except ImportError:
     # Mock it on non-rpi machines
     RFDevice = RFDeviceMock
@@ -28,7 +31,7 @@ except ImportError:
 
 class UnsupportedDeviceError(Exception):
     """Raised when a device is unsupported."""
-    pass
+    pass  # pylint: disable=unnecessary-pass
 
 
 @attr.s
@@ -53,8 +56,8 @@ class RC433(LogMixin):
 
     def send_code(self, code, times=3):
         """
-        Sends a decimal code via 433mhz. This implementation will actually send the code multiple times
-        to make sure that any disturbance in the force has less impact.
+        Sends a decimal code via 433mhz. This implementation will actually send
+        the code multiple times to make sure that any disturbance in the force has less impact.
 
         Args:
             code (int): Code to send
@@ -64,18 +67,20 @@ class RC433(LogMixin):
             Returns True if the underlying RFDevice acknowledged; otherwise False.
         """
         if not isinstance(code, int):
-            raise TypeError("Argument code is expected to be an int, but given is '{}'".format(type(code)))
+            raise TypeError("Argument code is expected to be an int, but given is '{}'"
+                            .format(type(code)))
         if not isinstance(times, int):
-            raise TypeError("Argument times is expected to be an int, but is '{}'".format(type(times)))
+            raise TypeError("Argument times is expected to be an int, but is '{}'"
+                            .format(type(times)))
 
         if times <= 0:
             times = 1
 
         self._initialize()
-        self.logger.debug("Sending code '{}' for {} times".format(code, str(times)))
+        self.logger.debug("Sending code '%s' for %s times", code, str(times))
         return any([self.rf_device.tx_code(code) for _ in range(times)])
 
-    def switch_device(self, device, on):
+    def switch_device(self, on_off, device):
         """
         Switches the specified device to on resp. off.
 
@@ -83,17 +88,16 @@ class RC433(LogMixin):
 
         Args:
             device (rpi433rc.business.devices.Device): The device to turn on resp. off
-            on (bool): If True the device will be set on; otherwise off.
+            on_off (bool): If True the device will be set on; otherwise off.
 
         Returns:
             Returns True if the underlying RFDevice acknowledged; otherwise False.
         """
-        self.logger.debug("Device switch for '{}' to '{}' requested".format(str(device), str(on)))
-        from .registry import StatefulDevice
-        if isinstance(device, StatefulDevice):
-            # Unpack the actual device from the Stateful device wrapper
-            device = device.device
+        self.logger.debug("Device switch for '%s' to '%s' requested", str(device), str(on_off))
         if isinstance(device, CodeDevice):
-            return self.send_code(device.code_on if on else device.code_off, times=device.resend)
+            return self.send_code(
+                device.code_on if on_off else device.code_off,
+                times=device.resend
+            )
 
-        raise UnsupportedDeviceError("The device type '{}' is not supported".format(str(type(device))))
+        raise UnsupportedDeviceError("The device type '{}' is not supported".format(type(device)))

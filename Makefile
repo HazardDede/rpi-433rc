@@ -41,6 +41,7 @@ setup:
 
 lint:
 		flake8 --exclude=.tox --max-line-length 120 --ignore=E722 --ignore=E402 $(SOURCE_PATH)
+		pylint $(SOURCE_PATH)
 
 test:
 		pytest --verbose --color=yes \

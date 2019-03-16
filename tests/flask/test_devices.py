@@ -52,7 +52,7 @@ def test_lookup(flask_client, mocked_device_db):
         "state": "off"
     } == json.loads(resp.data.decode("utf-8"))
 
-    mocked_device_db.lookup.assert_called_with("device1")
+    mocked_device_db.lookup.assert_called_with(device_name="device1")
 
 
 def test_switch_on(flask_client, mocked_device_db, mocked_rfdevice):

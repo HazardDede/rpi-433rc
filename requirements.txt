@@ -18,8 +18,8 @@ jsonschema==2.6.0         # via flask-restplus
 markupsafe==1.0           # via jinja2
 paho-mqtt==1.4.0
 pytz==2017.3              # via flask-restplus
-rpi-rf==0.9.6
-rpi.gpio==0.6.3           # via rpi-rf
+rpi-rf==0.9.7
+rpi.gpio==0.6.5           # via rpi-rf
 schema==0.6.7
 six==1.11.0               # via flask-restplus
 werkzeug==0.14.1          # via flask

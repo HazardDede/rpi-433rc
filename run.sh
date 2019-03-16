@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
 
-gunicorn --workers 1 --bind 0.0.0.0:5000 rpi433rc.app:app
+BASEDIR=$(dirname "$0")
+export PYTHONPATH=${BASEDIR}
+python ${BASEDIR}/rpi433rc/runner.py --workers 1 --bind 0.0.0.0:5000

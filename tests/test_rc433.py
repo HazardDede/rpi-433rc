@@ -33,7 +33,7 @@ def test_switch_device():
     dut.rf_device = RFDeviceDummy()
 
     cd = CodeDevice(device_name='device1', code_on=12345, code_off=12345)
-    assert dut.switch_device(cd, True)
+    assert dut.switch_device(True, cd)
 
     with pytest.raises(UnsupportedDeviceError):
-        dut.switch_device(SystemDevice('device2', system_code="01010", device_code=4), True)
+        dut.switch_device(True, SystemDevice('device2', system_code="01010", device_code=4))

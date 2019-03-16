@@ -1,3 +1,5 @@
+"""Provides basic converters to flask."""
+
 from werkzeug.routing import BaseConverter
 
 
@@ -19,7 +21,9 @@ class OnOffConverter(BaseConverter):
     """
 
     def to_python(self, value):
+        """Converts the python string (that represents on/off) to a boolean."""
         return value.lower() == 'on'
 
     def to_url(self, value):
+        """Transforms the on/off to an url friendly value."""
         return BaseConverter.to_url(self, value='on' if value else 'off')
