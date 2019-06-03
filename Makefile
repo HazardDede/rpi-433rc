@@ -70,9 +70,13 @@ revoke-version:
 		git tag -d `git describe --tags --abbrev=0`    # delete the tag
 		git reset --hard HEAD~1                        # rollback the commit
 
-
 server:
-		PYTHONPATH=`pwd` python `pwd`/rpi433rc/runner.py
+		OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES \
+			PYTHONPATH=`pwd` \
+			python `pwd`/rpi433rc/runner.py
+
+mqtt:
+		docker run --rm -d -p 1883:1883 eclipse-mosquitto:1.6
 
 pin:
 		pip-compile --output-file requirements.txt requirements.in
