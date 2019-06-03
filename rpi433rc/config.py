@@ -3,7 +3,7 @@
 import os
 
 # Version
-VERSION = '1.1.0'
+VERSION = '1.1.1'
 
 # General
 CONFIG_DIR = os.environ.get('CONFIG_DIR', os.path.join(os.path.dirname(__file__), '../conf'))
