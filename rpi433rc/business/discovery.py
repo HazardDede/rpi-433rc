@@ -51,6 +51,7 @@ class MQTTDiscovery(LogMixin):
             config_topic = self.topic_config.mk_config_topic(dev.device_name)
             config = {
                 'command_topic': self.topic_config.mk_command_topic(dev.device_name),
+                'state_topic': self.topic_config.mk_state_topic(dev.device_name),
                 'name': dev.device_name,
                 'state_on': 'on',
                 'state_off': 'off',
