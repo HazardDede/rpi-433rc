@@ -71,8 +71,8 @@ revoke-version:
 		git reset --hard HEAD~1                        # rollback the commit
 
 
-gunicorn:
-		gunicorn --bind 0.0.0.0:5000 wsgi
+server:
+		PYTHONPATH=`pwd` python `pwd`/rpi433rc/runner.py
 
 pin:
 		pip-compile --output-file requirements.txt requirements.in
