@@ -22,4 +22,4 @@ rpi-rf==0.9.7
 rpi.gpio==0.6.5           # via rpi-rf
 schema==0.6.7
 six==1.11.0               # via flask-restplus
-werkzeug==0.14.1          # via flask
+werkzeug==0.15.3          # via flask
